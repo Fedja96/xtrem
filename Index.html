@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPTV App</title>
+    <link href="https://vjs.zencdn.net/7.11.4/video-js.css" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: #f0f0f0;
+        }
+
+        header {
+            background: linear-gradient(45deg, #2c2c2c, #4c4c4c);
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .logo {
+            max-width: 100px;
+            height: auto;
+            margin: 0 auto;
+            cursor: pointer;
+        }
+
+        .title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #333;
+            border: 1px solid #555;
+            border-radius: 5px;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+
+        .input-container {
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+        }
+
+        input[type="text"], input[type="password"] {
+            width: 70%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #333;
+            color: #f0f0f0;
+            border: 2px solid #555;
+            padding: 10px 20px;
+            text-decoration: none;
+            font-size: 18px;
+            margin: 10px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            transition: background-color 0.3s, color 0.3s, transform 0.3s;
+            width: 135px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        button:hover {
+            background-color: #555;
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        #menu {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        #menu button {
+            margin: 0 10px;
+            background-color: #333;
+            color: #f0f0f0;
+            border: 2px solid #555;
+            padding: 10px 20px;
+            text-decoration: none;
+            font-size: 18px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            transition: background-color 0.3s, color 0.3s, transform 0.3s;
+            width: 100px;
+            height: 35px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #menu button:hover {
+            background-color: #555;
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        #categoriesContainer {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .category {
+            margin-top: 20px;
+            display: block; /* Ändere display: inline-block; zu display: block; */
+            text-align: center;
+        }
+
+        .category h3 {
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+        .channelList {
+            list-style-type: none;
+            padding: 0;
+            display: none;
+        }
+
+        .channelList li {
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+            cursor: pointer;
+            color: #f0f0f0;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .channelList li:hover {
+            background-color: #333;
+            color: #fff;
+        }
+
+        .player-container {
+            display: none;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+       .search-box {
+    margin-top: 10px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#searchInput {
+    width: 70%;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    margin-right: 10px;
+}
+
+#searchButton {
+    width: 70px;
+    padding: 10px 20px;
+    font-size: 18px;
+    border: none;
+    border-radius: 5px;
+    background-color: #ffcc00; /* Ändere hier die Hintergrundfarbe zu Gelb */
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+#searchButton:hover {
+    background-color: #e6b800; /* Etwas dunkleres Gelb für den Hover-Effekt */
+    transform: translateY(-2px);
+}
+
+        .scroll-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 60px;
+            cursor: pointer;
+            background-color: #ffcc00;
+            color: #fff;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .video-js {
+            width: 80%;
+            height: auto;
+            margin: 0 auto;
+            border: 1px solid #555;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <img src="/pics/Logo.png" alt="SaurusTV" class="logo" onclick="goToHomePage()">
+    <div class="title">SaurusLuxe TV</div>
+    <button onclick="toggleLogin()">Login</button>
+</header>
+
+<div class="input-container" id="loginForm">
+    <label for="username">Benutzername:</label><br>
+    <input type="text" id="username" name="username"><br><br>
+    <label for="password">Passwort:</label><br>
+    <input type="password" id="password" name="password"><br><br>
+    <label for="serverUrl">Server URL:</label><br>
+    <input type="text" id="serverUrl" name="serverUrl"><br><br>
+    <button onclick="login()">Login</button>
+</div>
+
+<div id="menu">
+    <button onclick="loadContent('live')">Live</button>
+    <button onclick="loadContent('movies')">Filme</button>
+    <button onclick="loadContent('series')">Serien</button>
+</div>
+
+<div class="search-box">
+    <input type="text" id="searchInput" placeholder="Kanal suchen...">
+    <button id="searchButton">Go</button>
+</div>
+
+<div id="categoriesContainer"></div>
+
+<div class="scroll-to-top" title="Nach oben">↑</div>
+
+<script src="https://vjs.zencdn.net/7.11.4/video.min.js"></script>
+<script>
+    let currentContent = 'live';
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const storedUsername = localStorage.getItem('username');
+        const storedPassword = localStorage.getItem('password');
+        const storedServerUrl = localStorage.getItem('serverUrl');
+
+        if (storedUsername && storedPassword && storedServerUrl) {
+            document.getElementById('username').value = storedUsername;
+            document.getElementById('password').value = storedPassword;
+            document.getElementById('serverUrl').value = storedServerUrl;
+            loadContent(currentContent);
+        }
+    });
+
+    function toggleLogin() {
+        const loginForm = document.getElementById('loginForm');
+        loginForm.style.display = loginForm.style.display === 'block' ? 'none' : 'block';
+    }
+
+    async function login() {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const serverUrl = document.getElementById('serverUrl').value;
+
+        localStorage.setItem('username', username);
+        localStorage.setItem('password', password);
+        localStorage.setItem('serverUrl', serverUrl);
+
+        try {
+            await loadContent(currentContent);
+        } catch (error) {
+            alert('Fehler beim Abrufen der Daten. Überprüfen Sie die Konsole für mehr Details.');
+            console.error('Fehler beim Abrufen der Daten:', error);
+        }
+    }
+
+    async function loadContent(contentType) {
+        currentContent = contentType;
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const serverUrl = document.getElementById('serverUrl').value;
+
+        try {
+            let categoriesResponse, channelsResponse;
+
+            if (contentType === 'live') {
+                categoriesResponse = await fetch(`${serverUrl}/player_api.php?username=${username}&password=${password}&action=get_live_categories`);
+                channelsResponse = await fetch(`${serverUrl}/player_api.php?username=${username}&password=${password}&action=get_live_streams`);
+            } else if (contentType === 'movies') {
+                categoriesResponse = await fetch(`${serverUrl}/player_api.php?username=${username}&password=${password}&action=get_vod_categories`);
+                channelsResponse = await fetch(`${serverUrl}/player_api.php?username=${username}&password=${password}&action=get_vod_streams`);
+            } else if (contentType === 'series') {
+                categoriesResponse = await fetch(`${serverUrl}/player_api.php?username=${username}&password=${password}&action=get_series_categories`);
+                channelsResponse = await fetch(`${serverUrl}/player_api.php?username=${username}&password=${password}&action=get_series`);
+            }
+
+            if (!categoriesResponse.ok || !channelsResponse.ok) {
+                throw new Error('Fehler beim Abrufen der Kategorien oder Kanäle');
+            }
+
+            const categoriesData = await categoriesResponse.json();
+            const channelsData = await channelsResponse.json();
+
+            loadCategories(categoriesData, channelsData);
+        } catch (error) {
+            alert('Fehler beim Abrufen der Daten. Überprüfen Sie die Konsole für mehr Details.');
+            console.error('Fehler beim Abrufen der Daten:', error);
+        }
+    }
+
+    function loadCategories(categories, channels) {
+        const categoriesContainer = document.getElementById('categoriesContainer');
+        categoriesContainer.innerHTML = '';
+
+        categories.forEach(category => {
+            const categoryDiv = document.createElement('div');
+            categoryDiv.classList.add('category');
+
+            const categoryTitle = document.createElement('h3');
+            categoryTitle.textContent = category.category_name;
+            categoryTitle.onclick = () => {
+                const channelList = categoryDiv.querySelector('.channelList');
+                channelList.style.display = channelList.style.display === 'none' ? 'block' : 'none';
+            };
+            categoryDiv.appendChild(categoryTitle);
+
+            const channelList = document.createElement('ul');
+            channelList.classList.add('channelList');
+
+            let filteredChannels;
+            if (currentContent === 'series') {
+                filteredChannels = channels.filter(channel => channel.category_id === category.category_id)
+                    .map(channel => ({
+                        name: channel.name,
+                        series_id: channel.series_id,
+                        episodes: channel.episodes
+                    }));
+            } else {
+                filteredChannels = channels.filter(channel => channel.category_id === category.category_id);
+            }
+
+            filteredChannels.forEach(channel => {
+                const li = document.createElement('li');
+                li.textContent = channel.name;
+                li.onclick = () => showEpisodes(channel.series_id, channel.episodes, li);
+                channelList.appendChild(li);
+            });
+
+            categoryDiv.appendChild(channelList);
+            categoriesContainer.appendChild(categoryDiv);
+        });
+    }
+
+    function showEpisodes(seriesId, episodes, element) {
+        const episodeList = document.createElement('ul');
+        episodeList.classList.add('episodeList');
+
+        episodes.forEach(episode => {
+            const li = document.createElement('li');
+            li.textContent = episode.title;
+            li.onclick = () => playChannel(episode.id, li);
+            episodeList.appendChild(li);
+        });
+
+        element.appendChild(episodeList);
+    }
+
+    async function playChannel(streamId, element) {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const serverUrl = document.getElementById('serverUrl').value;
+        let videoUrl;
+
+        if (currentContent === 'live') {
+            videoUrl = `${serverUrl}/live/${username}/${password}/${streamId}.m3u8`;
+        } else if (currentContent === 'movies') {
+            videoUrl = `${serverUrl}/movie/${username}/${password}/${streamId}.m3u8`;
+        } else if (currentContent === 'series') {
+            videoUrl = `${serverUrl}/series/${username}/${password}/${streamId}.m3u8`;
+        }
+
+        let playerContainer = element.nextElementSibling;
+        if (!playerContainer || !playerContainer.classList.contains('player-container')) {
+            playerContainer = document.createElement('div');
+            playerContainer.classList.add('player-container');
+
+            const videoPlayer = document.createElement('video');
+            videoPlayer.id = 'videoPlayer-' + streamId;
+            videoPlayer.classList.add('video-js', 'vjs-default-skin');
+            videoPlayer.setAttribute('controls', '');
+            videoPlayer.setAttribute('preload', 'auto');
+
+            const source = document.createElement('source');
+            source.setAttribute('src', videoUrl);
+            source.setAttribute('type', 'application/x-mpegURL');
+            videoPlayer.appendChild(source);
+
+            playerContainer.appendChild(videoPlayer);
+            element.after(playerContainer);
+
+            const player = videojs(videoPlayer);
+            player.src({ type: 'application/x-mpegURL', src: videoUrl });
+            player.play();
+        } else {
+            const videoPlayer = playerContainer.querySelector('video');
+            const player = videojs(videoPlayer);
+            player.src({ type: 'application/x-mpegURL', src: videoUrl });
+            player.play();
+        }
+
+        playerContainer.style.display = 'block';
+
+        const fullScreenElement = document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement;
+        if (!fullScreenElement) {
+            if (playerContainer.requestFullscreen) {
+                playerContainer.requestFullscreen();
+            } else if (playerContainer.mozRequestFullScreen) {
+                playerContainer.mozRequestFullScreen();
+            } else if (playerContainer.webkitRequestFullscreen) {
+                playerContainer.webkitRequestFullscreen();
+            } else if (playerContainer.msRequestFullscreen) {
+                playerContainer.msRequestFullscreen();
+            }
+        }
+    }
+
+    function goToHomePage() {
+        window.location.href = '/';
+    }
+
+    document.getElementById('searchButton').addEventListener('click', function() {
+        const value = document.getElementById('searchInput').value.toLowerCase();
+        let hasResults = false;
+
+        document.querySelectorAll('.channelList li').forEach(item => {
+            const match = item.textContent.toLowerCase().includes(value);
+            item.style.display = match ? 'block' : 'none';
+            if (match) hasResults = true;
+        });
+
+        document.querySelectorAll('.category').forEach(category => {
+            const hasVisibleItems = category.querySelectorAll("li[style='display: block;']").length > 0;
+            category.style.display = hasVisibleItems ? 'block' : 'none';
+        });
+
+        const noResultsMessage = document.getElementById('noResultsMessage');
+        if (noResultsMessage) {
+            noResultsMessage.style.display = value === '' ? 'none' : (hasResults ? 'none' : 'block');
+        }
+    });
+
+    document.getElementById('searchInput').addEventListener('keyup', function(e) {
+        if (e.key === 'Enter' || e.keyCode === 13) {
+            document.getElementById('searchButton').click();
+        }
+    });
+
+    document.querySelector('.scroll-to-top').addEventListener('click', function() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+</script>
+</body>
+</html>
