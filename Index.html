@@ -141,45 +141,64 @@
             color: #fff;
         }
 
+        .episodeList {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .episodeList li {
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+            cursor: pointer;
+            color: #f0f0f0;
+            transition: background-color 0.3s, color 0.3s;
+            margin-left: 20px;
+        }
+
+        .episodeList li:hover {
+            background-color: #444;
+            color: #fff;
+        }
+
         .player-container {
             display: none;
             margin-top: 20px;
             text-align: center;
         }
 
-       .search-box {
-    margin-top: 10px;
-    text-align: center;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
+        .search-box {
+            margin-top: 10px;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-#searchInput {
-    width: 70%;
-    padding: 10px;
-    font-size: 16px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    margin-right: 10px;
-}
+        #searchInput {
+            width: 70%;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-right: 10px;
+        }
 
-#searchButton {
-    width: 70px;
-    padding: 10px 20px;
-    font-size: 18px;
-    border: none;
-    border-radius: 5px;
-    background-color: #ffcc00; /* Ändere hier die Hintergrundfarbe zu Gelb */
-    color: #fff;
-    cursor: pointer;
-    transition: background-color 0.3s, transform 0.3s;
-}
+        #searchButton {
+            width: 70px;
+            padding: 10px 20px;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            background-color: #ffcc00; /* Ändere hier die Hintergrundfarbe zu Gelb */
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
 
-#searchButton:hover {
-    background-color: #e6b800; /* Etwas dunkleres Gelb für den Hover-Effekt */
-    transform: translateY(-2px);
-}
+        #searchButton:hover {
+            background-color: #e6b800; /* Etwas dunkleres Gelb für den Hover-Effekt */
+            transform: translateY(-2px);
+        }
 
         .scroll-to-top {
             position: fixed;
@@ -344,7 +363,13 @@
             filteredChannels.forEach(channel => {
                 const li = document.createElement('li');
                 li.textContent = channel.name;
-                li.onclick = () => showEpisodes(channel.series_id, channel.episodes, li);
+                li.onclick = () => {
+                    if (currentContent === 'series') {
+                        showEpisodes(channel.series_id, channel.episodes, li);
+                    } else {
+                        playChannel(channel.stream_id, li);
+                    }
+                };
                 channelList.appendChild(li);
             });
 
@@ -360,7 +385,11 @@
         episodes.forEach(episode => {
             const li = document.createElement('li');
             li.textContent = episode.title;
-            li.onclick = () => playChannel(episode.id, li);
+            li.setAttribute('data-episode-id', episode.id);
+            li.onclick = (e) => {
+                e.stopPropagation();
+                playChannel(episode.id, li);
+            };
             episodeList.appendChild(li);
         });
 
